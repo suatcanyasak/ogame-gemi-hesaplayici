@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Ogame Nakliye Hesaplayıcı</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    :root{
+        --bg:#050a0e; --panel:#111a21; --border:#243442;
+        --accent:#4a9eff; --text:#d1d9e1; --highlight:#ff9f43; --green:#3fb950;
+    }
+    body{ font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 15px; }
+    .box{
+        max-width: 500px; margin: auto; background: var(--panel);
+        border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+    h2{ text-align: center; color: var(--accent); margin-bottom: 20px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;}
+    
+    .section-label { font-size: 11px; font-weight: bold; color: var(--highlight); text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 1px;}
+    
+    .class-selector { display: flex; gap: 8px; margin-bottom: 15px; }
+    .class-btn { 
+        flex: 1; padding: 8px 5px; border: 1px solid var(--border); background: #081119; 
+        color: var(--text); border-radius: 6px; cursor: pointer; font-size: 10px; text-align: center; transition: 0.3s;
+    }
+    .class-btn.active { border-color: var(--accent); background: rgba(74, 158, 255, 0.1); color: var(--accent); font-weight: bold; }
+
+    .input-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px;}
+    .input-row label { font-size: 13px; flex: 1; }
+    
+    input { 
+        padding: 10px; font-size: 14px; 
+        color: #fff; background: #081119; border: 1px solid var(--border); border-radius: 6px; outline: none; 
+    }
+    input:focus { border-color: var(--accent); }
+    .bonus-input { width: 60px; text-align: center; color: var(--highlight); }
+    .fill-input { width: 80px; text-align: center; color: var(--green); font-weight: bold; }
+
+    .amount-container { display: flex; gap: 10px; align-items: center; }
+    .unit-selector { display: flex; gap: 5px; }
+    .unit-btn { 
+        padding: 10px 15px; border: 1px solid var(--border); background: #1c2a35; 
+        color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold;
+    }
+    .unit-btn.active { background: var(--highlight); border-color: var(--highlight); color: #000; }
+
+    .result {
+        margin-top: 15px; padding: 15px; background: #0c1620;
+        border-radius: 8px; border-left: 4px solid var(--green);
+    }
+    .res-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+    .res-line b { color: var(--green); font-size: 15px; font-family: monospace; }
+    .unit-cap-tag { font-size: 9px; color: #6a89a7; background: #1b2a38; padding: 2px 5px; border-radius: 4px; display: block; margin-top: 3px;}
+    
+    .info-text { font-size: 10px; color: #6a89a7; margin-top: 15px; display: block; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Ogame Nakliye Hesaplayıcı</h2>
+
+    <span class="section-label">Sınıf Seçimi</span>
+    <div class="class-selector" id="class-tabs">
+        <div class="class-btn active" data-class="collector">Koleksiyoncu<br><small>Nakliye %25</small></div>
+        <div class="class-btn" data-class="general">General<br><small>Rehber %20</small></div>
+        <div class="class-btn" data-class="explorer">Kaşif<br><small>Bonus Yok</small></div>
+    </div>
+
+    <div class="input-row" style="background: rgba(74, 158, 255, 0.05); border: 1px solid var(--border);">
+        <label style="color: var(--accent); font-weight: bold;">Hiperuzay Tekniği</label>
+        <input type="number" id="hiper-lvl" value="0" min="0" class="bonus-input">
+    </div>
+
+    <div class="input-row" style="background: rgba(63, 185, 80, 0.05); border: 1px solid var(--border); margin-bottom: 20px;">
+        <label style="color: var(--green); font-weight: bold;">Ganimet (%)</label>
+        <input type="number" id="fill-rate" value="75" min="1" max="100" class="fill-input">
+    </div>
+
+    <span class="section-label">Canlı Türü Teknoloji Bonusu (%)</span>
+    <div class="input-row">
+        <label>Küçük Nakliye</label>
+        <input type="number" id="small-bonus" class="bonus-input" value="0" step="0.1">
+    </div>
+    <div class="input-row">
+        <label>Büyük Nakliye</label>
+        <input type="number" id="large-bonus" class="bonus-input" value="0" step="0.1">
+    </div>
+    <div class="input-row">
+        <label>Rehber (Pathfinder)</label>
+        <input type="number" id="guide-bonus" class="bonus-input" value="0" step="0.1">
+    </div>
+
+    <div class="input-group" style="margin-top:20px;">
+        <span class="section-label">Taşınacak Toplam Miktar</span>
+        <div class="amount-container">
+            <input type="number" id="amount-val" placeholder="Değer" style="flex:1">
+            <div class="unit-selector" id="unit-tabs">
+                <div class="unit-btn" data-unit="k">k</div>
+                <div class="unit-btn active" data-unit="m">m</div>
+                <div class="unit-btn" data-unit="M">M</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="result" id="result-box">
+        Verileri giriniz...
+    </div>
+    
+    <span class="info-text">Formül: (Toplam Miktar * Oran%) / [Baz * (1 + Bonuslar%)]</span>
+</div>
+
+<script>
+const BASE_CAPS = { small: 5000, large: 25000, guide: 10000 };
+let selectedClass = 'collector';
+let selectedUnit = 'm';
+
+document.getElementById('class-tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.class-btn');
+    if (!btn) return;
+    document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedClass = btn.dataset.class;
+    calculate();
+});
+
+document.getElementById('unit-tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.unit-btn');
+    if (!btn) return;
+    document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedUnit = btn.dataset.unit;
+    calculate();
+});
+
+document.querySelectorAll('input').forEach(inp => inp.addEventListener('input', calculate));
+
+function calculate() {
+    const hiperLvl = parseInt(document.getElementById('hiper-lvl').value) || 0;
+    const amountVal = parseFloat(document.getElementById('amount-val').value) || 0;
+    const fillRate = (parseFloat(document.getElementById('fill-rate').value) || 100) / 100;
+    
+    const sBonusLF = (parseFloat(document.getElementById('small-bonus').value) || 0) / 100;
+    const lBonusLF = (parseFloat(document.getElementById('large-bonus').value) || 0) / 100;
+    const gBonusLF = (parseFloat(document.getElementById('guide-bonus').value) || 0) / 100;
+
+    const resultBox = document.getElementById('result-box');
+
+    if (amountVal <= 0) {
+        resultBox.innerHTML = "Lütfen miktarı giriniz...";
+        return;
+    }
+
+    let mult = { k: 1000, m: 1000000, M: 1000000000 }[selectedUnit];
+    const rawTotal = amountVal * mult;
+    
+    // HESAPLAMA MANTIĞI DEĞİŞTİ: 
+    // Taşınacak miktar orantılanıyor (Örn: 1M'in %75'i olan 750k baz alınıyor)
+    const targetPayload = rawTotal * fillRate;
+    
+    const hiperBonus = hiperLvl * 0.05;
+    let sB_Class = 0, lB_Class = 0, gB_Class = 0;
+    if (selectedClass === 'collector') { sB_Class = 0.25; lB_Class = 0.25; }
+    if (selectedClass === 'general') { gB_Class = 0.20; }
+
+    // Tam Kapasite (Baz + Bonuslar)
+    const cSmall = Math.floor(BASE_CAPS.small * (1 + hiperBonus + sB_Class + sBonusLF));
+    const cLarge = Math.floor(BASE_CAPS.large * (1 + hiperBonus + lB_Class + lBonusLF));
+    const cGuide = Math.floor(BASE_CAPS.guide * (1 + hiperBonus + gB_Class + gBonusLF));
+
+    resultBox.innerHTML = `
+        <div class="res-line" style="color:var(--highlight); border-bottom:1px solid #243442; padding-bottom:10px; margin-bottom:15px;">
+            <span>Hesaplanan Yük (%${(fillRate*100).toFixed(0)}):</span> 
+            <b>${targetPayload.toLocaleString('tr-TR')}</b>
+        </div>
+        <div class="res-line">
+            <span>K. Nakliye <small class="unit-cap-tag">Birim Kap: ${cSmall.toLocaleString()}</small></span>
+            <b>${Math.ceil(targetPayload / cSmall).toLocaleString('tr-TR')} adet</b>
+        </div>
+        <div class="res-line">
+            <span>B. Nakliye <small class="unit-cap-tag">Birim Kap: ${cLarge.toLocaleString()}</small></span>
+            <b>${Math.ceil(targetPayload / cLarge).toLocaleString('tr-TR')} adet</b>
+        </div>
+        <div class="res-line">
+            <span>Rehber <small class="unit-cap-tag">Birim Kap: ${cGuide.toLocaleString()}</small></span>
+            <b>${Math.ceil(targetPayload / cGuide).toLocaleString('tr-TR')} adet</b>
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>
